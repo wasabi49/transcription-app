@@ -66,14 +66,11 @@ class TranscribeMusicUseCase:
             simplified.note_count,
         )
 
-        # 4. MusicXML生成
-        musicxml = self._sheet_music_generator.generate_musicxml(simplified)
-        logger.info("MusicXML生成完了")
+        # 4. MusicXML + MIDI Base64 を同一 Score から生成（一致保証）
+        musicxml, midi_base64 = self._sheet_music_generator.generate_musicxml_and_midi(simplified)
+        logger.info("MusicXML + MIDI 生成完了")
 
-        # 5. Base64 MIDI生成
-        midi_base64 = self._midi_processor.to_base64(simplified)
-
-        # 6. メタデータ
+        # 5. メタデータ
         metadata = TranscriptionMetadata(
             duration_seconds=simplified.duration,
             note_count=simplified.note_count,

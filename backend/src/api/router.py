@@ -15,8 +15,10 @@ from fastapi.responses import StreamingResponse
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 
-from src.api.dependencies import get_simplify_usecase, get_transcribe_usecase
-from src.api.schemas import MetadataResponse, SimplifyRequest, SimplifyResponse
+from src.api.dependencies import get_midi_processor, get_sheet_music_generator, get_simplify_usecase, get_transcribe_usecase
+from src.application.ports.midi_processor import MidiProcessorPort
+from src.application.ports.sheet_music_generator import SheetMusicGeneratorPort
+from src.api.schemas import ExportPdfRequest, MetadataResponse, SimplifyRequest, SimplifyResponse
 from src.application.usecases.simplify_music import SimplifyMusicUseCase
 from src.application.usecases.transcribe_music import TranscribeMusicUseCase
 from src.core.config import settings
@@ -240,6 +242,42 @@ async def simplify_endpoint(
         raise HTTPException(
             status_code=500,
             detail="簡略化処理中にエラーが発生しました",
+        ) from exc
+
+
+@router.post("/export-pdf")
+async def export_pdf(
+    request_body: ExportPdfRequest,
+    midi_processor: MidiProcessorPort = Depends(get_midi_processor),  # noqa: B008
+    sheet_music_generator: SheetMusicGeneratorPort = Depends(get_sheet_music_generator),  # noqa: B008
+):
+    """MIDI Base64 から PDF を生成して返す
+
+    converter.parse() による MusicXML 再パースを回避するため、
+    _build_score() と同じパスで Score を構築してから PDF を書き出す。
+    """
+    try:
+        def _generate_pdf() -> bytes:
+            # Base64 → MidiData（ブラウザ表示と同じデータソース）
+            midi_data = midi_processor.from_base64(request_body.midi_base64)
+            # _build_score() と同じパスで Score 構築（再パース回避）
+            score = sheet_music_generator.build_score(midi_data)
+            pdf_path = score.write("lily.pdf")
+            pdf_bytes = Path(pdf_path).read_bytes()
+            return pdf_bytes
+
+        pdf_bytes = await asyncio.to_thread(_generate_pdf)
+
+        return StreamingResponse(
+            iter([pdf_bytes]),
+            media_type="application/pdf",
+            headers={"Content-Disposition": 'attachment; filename="score.pdf"'},
+        )
+    except Exception as exc:
+        logger.exception("PDF生成エラー")
+        raise HTTPException(
+            status_code=500,
+            detail="PDF生成中にエラーが発生しました",
         ) from exc
 
 

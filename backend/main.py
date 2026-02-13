@@ -26,12 +26,20 @@ async def lifespan(app: FastAPI):
 
     # Basic Pitchモデルのプリロード
     try:
+        import logging as _logging
+
+        # TensorFlow の冗長ログを抑制
+        _logging.getLogger("tensorflow").setLevel(_logging.ERROR)
+        import os
+
+        os.environ.setdefault("TF_CPP_MIN_LOG_LEVEL", "3")
+
         from basic_pitch import ICASSP_2022_MODEL_PATH  # noqa: F401
         from basic_pitch.inference import predict  # noqa: F401
 
         logger.info("Basic Pitch モデルのプリロード完了")
-    except Exception:
-        logger.warning("Basic Pitch モデルのプリロードに失敗（初回リクエスト時にロードされます）")
+    except Exception as e:
+        logger.warning("Basic Pitch モデルのプリロードに失敗（初回リクエスト時にロードされます）: %s", e)
 
     yield
 

@@ -32,6 +32,12 @@ class MetadataResponse(BaseModel):
     difficulty: Difficulty = Field(..., description="難易度")
 
 
+class ExportPdfRequest(BaseModel):
+    """PDF出力リクエスト"""
+
+    midi_base64: str = Field(..., description="Base64エンコードされたMIDIデータ")
+
+
 class HealthResponse(BaseModel):
     """ヘルスチェックレスポンス"""
 

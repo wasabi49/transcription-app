@@ -32,6 +32,7 @@ def mock_midi_processor():
 def mock_sheet_music_generator():
     generator = MagicMock()
     generator.generate_musicxml.return_value = "<score-partwise></score-partwise>"
+    generator.generate_musicxml_and_midi.return_value = ("<score-partwise></score-partwise>", "dGVzdA==")
     return generator
 
 
@@ -68,5 +69,4 @@ class TestTranscribeMusicUseCase:
 
         # 全ポートが呼ばれている
         mock_transcriber.transcribe.assert_called_once()
-        mock_sheet_music_generator.generate_musicxml.assert_called_once()
-        mock_midi_processor.to_base64.assert_called_once()
+        mock_sheet_music_generator.generate_musicxml_and_midi.assert_called_once()

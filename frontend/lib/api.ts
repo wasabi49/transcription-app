@@ -5,7 +5,7 @@
  * EventSource はGETのみのため fetch + ReadableStream で実装。
  */
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const API_BASE_URL = "";
 
 export interface SSEEvent {
   event: string;
@@ -84,33 +84,25 @@ export async function transcribeWithSSE(
 }
 
 /**
- * 難易度変更API（同期）
+ * MIDI Base64からPDFをダウンロードする
+ * ブラウザ表示と同じ _build_score() パスでScoreを構築するため
+ * MusicXMLの再パースによる差異が発生しない
  */
-export async function simplifyMusic(
-  midiBase64: string,
-  difficulty: string
-): Promise<{
-  musicxml: string;
-  midi_base64: string;
-  metadata: {
-    duration_seconds: number;
-    note_count: number;
-    tempo: number;
-    difficulty: string;
-  };
-}> {
-  const response = await fetch(`${API_BASE_URL}/api/simplify`, {
+export async function downloadPdf(
+  midiBase64: string
+): Promise<Blob> {
+  const response = await fetch(`${API_BASE_URL}/api/export-pdf`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ midi_base64: midiBase64, difficulty }),
+    body: JSON.stringify({ midi_base64: midiBase64 }),
   });
 
   if (!response.ok) {
     const errorText = await response.text();
-    throw new Error(`難易度変更に失敗しました: ${errorText}`);
+    throw new Error(`PDF生成に失敗しました: ${errorText}`);
   }
 
-  return response.json();
+  return response.blob();
 }
 
 /**

@@ -23,7 +23,7 @@ class TestSimplifyMusicUseCase:
     def test_execute_original(self):
         processor = _make_mock_processor()
         generator = MagicMock()
-        generator.generate_musicxml.return_value = "<xml/>"
+        generator.generate_musicxml_and_midi.return_value = ("<xml/>", "bmV3X21pZGk=")
 
         usecase = SimplifyMusicUseCase(
             midi_processor=processor,
@@ -38,7 +38,7 @@ class TestSimplifyMusicUseCase:
     def test_execute_beginner(self):
         processor = _make_mock_processor()
         generator = MagicMock()
-        generator.generate_musicxml.return_value = "<xml/>"
+        generator.generate_musicxml_and_midi.return_value = ("<xml/>", "bmV3X21pZGk=")
 
         usecase = SimplifyMusicUseCase(
             midi_processor=processor,

@@ -44,8 +44,6 @@ interface AppState {
   transcriptionStatus: TranscriptionStatus;
   progress: ProgressInfo | null;
   result: TranscriptionResult | null;
-  /** 原曲のMIDI Base64（難易度変更の元データ） */
-  originalMidiBase64: string | null;
   errorMessage: string | null;
 
   // 再生状態
@@ -58,7 +56,6 @@ interface AppState {
   setTranscriptionStatus: (status: TranscriptionStatus) => void;
   setProgress: (progress: ProgressInfo) => void;
   setResult: (result: TranscriptionResult) => void;
-  setOriginalMidiBase64: (midi: string) => void;
   setErrorMessage: (message: string | null) => void;
   setPlaybackStatus: (status: PlaybackStatus) => void;
   setDifficulty: (difficulty: Difficulty) => void;
@@ -69,7 +66,6 @@ const initialState = {
   transcriptionStatus: "idle" as TranscriptionStatus,
   progress: null,
   result: null,
-  originalMidiBase64: null,
   errorMessage: null,
   playbackStatus: "stopped" as PlaybackStatus,
   difficulty: "original" as Difficulty,
@@ -83,8 +79,6 @@ export const useAppStore = create<AppState>((set) => ({
   setProgress: (progress) => set({ progress }),
 
   setResult: (result) => set({ result, transcriptionStatus: "complete" }),
-
-  setOriginalMidiBase64: (midi) => set({ originalMidiBase64: midi }),
 
   setErrorMessage: (message) =>
     set({ errorMessage: message, transcriptionStatus: message ? "error" : "idle" }),

@@ -1,8 +1,8 @@
 FROM python:3.11-slim
 
-# ffmpeg インストール（音声デコードに必要）
+# ffmpeg（音声デコード）+ lilypond（PDF楽譜生成）インストール
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends ffmpeg && \
+    apt-get install -y --no-install-recommends ffmpeg lilypond && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
